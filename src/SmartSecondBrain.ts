@@ -172,7 +172,7 @@ export default class SmartSecondBrain {
 
     getVectorStoreFile() {
         const d = get(data);
-        return normalizePath(this.pluginDir + '/vectorstores/' + (d.isIncognitoMode ? d.ollamaEmbedModel.model : d.openAIEmbedModel.model) + '.bin');
+        return normalizePath(`${this.pluginDir}/vectorstores/${d.isIncognitoMode ? d.ollamaEmbedModel.model : d.openAIEmbedModel.model}.bin`);
     }
 
     async saveVectorStoreData() {
@@ -180,7 +180,7 @@ export default class SmartSecondBrain {
             Log.debug('Saving vector store data');
             this.needsToSaveVectorStoreData = false;
             // create vectorstores directory if it doesn't exist
-            (await this.app.vault.adapter.exists(this.pluginDir + '/vectorstores')) || (await this.app.vault.adapter.mkdir(this.pluginDir + '/vectorstores'));
+            (await this.app.vault.adapter.exists(`${this.pluginDir}/vectorstores`)) || (await this.app.vault.adapter.mkdir(`${this.pluginDir}/vectorstores`));
             await this.app.vault.adapter.writeBinary(this.getVectorStoreFile(), await this.papa.getData());
             Log.info('Saved vector store data');
         }

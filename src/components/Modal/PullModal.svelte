@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { Modal } from "obsidian";
+    export let modal: Modal;
     import { onMount } from 'svelte';
     import { isOllamaRunning } from '../../controller/Ollama';
     import PullOllamaModel from '../Onboarding/PullOllamaModel.svelte';

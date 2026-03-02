@@ -90,7 +90,7 @@ function getNormalizedPath(path: string): { root: string; subpath: string; alias
 
     return {
         root: splitOnHash[0],
-        subpath: splitOnHash[1] ? '#' + splitOnHash[1] : '',
+        subpath: splitOnHash[1] ? `#${splitOnHash[1]}` : '',
         alias: splitOnAlias[1] || '',
     };
 }
