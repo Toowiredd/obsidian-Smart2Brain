@@ -10,7 +10,7 @@ export async function isOllamaRunning() {
     const d = get(data);
     try {
         new URL(d.ollamaGenModel.baseUrl);
-        const response = await requestUrl(d.ollamaGenModel.baseUrl + '/api/tags');
+        const response = await requestUrl(`${d.ollamaGenModel.baseUrl}/api/tags`);
         if (response.status === 200) {
             return true;
         } else {
@@ -26,7 +26,7 @@ export async function isOllamaRunning() {
 export async function isOllamaOriginsSet() {
     const d = get(data);
     try {
-        const response = await fetch(d.ollamaGenModel.baseUrl + '/api/tags');
+        const response = await fetch(`${d.ollamaGenModel.baseUrl}/api/tags`);
         if (response.status === 200) {
             return true;
         } else {
@@ -43,7 +43,7 @@ export async function getOllamaModels(): Promise<string[]> {
     const d = get(data);
     try {
         const modelsRes = await requestUrl({
-            url: d.ollamaGenModel.baseUrl + '/api/tags',
+            url: `${d.ollamaGenModel.baseUrl}/api/tags`,
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -94,10 +94,9 @@ export async function ollamaEmbedChange(selected: string) {
 export const changeOllamaBaseUrl = async (newBaseUrl: string) => {
     const d = get(data);
     const plugin = get(p);
-    newBaseUrl.trim();
-    if (newBaseUrl.endsWith('/')) newBaseUrl = newBaseUrl.slice(0, -1);
-    d.ollamaGenModel.baseUrl = newBaseUrl;
-    d.ollamaEmbedModel.baseUrl = newBaseUrl;
+    const baseUrl = newBaseUrl.trim().endsWith('/') ? newBaseUrl.trim().slice(0, -1) : newBaseUrl.trim();
+    d.ollamaGenModel.baseUrl = baseUrl;
+    d.ollamaEmbedModel.baseUrl = baseUrl;
     await plugin.saveSettings();
     papaState.set('settings-change');
 };
@@ -107,7 +106,7 @@ export async function deleteOllamaModels(model: string): Promise<boolean> {
     const t = get(_);
     try {
         const modelsRes = await requestUrl({
-            url: d.ollamaGenModel.baseUrl + '/api/delete',
+            url: `${d.ollamaGenModel.baseUrl}/api/delete`,
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

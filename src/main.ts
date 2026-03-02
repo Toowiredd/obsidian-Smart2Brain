@@ -170,27 +170,29 @@ export default class SecondBrainPlugin extends Plugin {
             await this.leaf.setViewState({ type: VIEW_TYPE_SETUP, active: true });
         } else {
             this.app.workspace.detachLeavesOfType(VIEW_TYPE_SETUP);
-            if (!file) {
+            let activeFile = file;
+            if (!activeFile) {
                 // If no file is provided, open the default chat
                 const chatDirExists = await this.app.vault.adapter.exists(normalizePath(d.targetFolder));
                 if (!chatDirExists) {
                     await this.app.vault.createFolder(normalizePath(d.targetFolder));
                 }
-                const defaultChatExists = await this.app.vault.adapter.exists(normalizePath(d.targetFolder + '/' + d.defaultChatName + '.md'));
-                file = defaultChatExists
-                    ? this.app.metadataCache.getFirstLinkpathDest(d.targetFolder + '/' + d.defaultChatName + '.md', '')
+                const defaultChatExists = await this.app.vault.adapter.exists(normalizePath(`${d.targetFolder}/${d.defaultChatName}.md`));
+
+                activeFile = defaultChatExists
+                    ? this.app.metadataCache.getFirstLinkpathDest(`${d.targetFolder}/${d.defaultChatName}.md`, '')
                     : await this.app.vault.create(
-                          normalizePath(d.targetFolder + '/' + d.defaultChatName + '.md'),
-                          'Assistant\n' + d.initialAssistantMessageContent + '\n- - - - -'
+                          normalizePath(`${d.targetFolder}/${d.defaultChatName}.md`),
+                          `Assistant\n${d.initialAssistantMessageContent}\n- - - - -`
                       );
             }
             const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CHAT);
             this.leaf = leaves.length ? leaves[0] : this.app.workspace.getRightLeaf(false);
             this.isChatAcivatedFromRibbon = true;
-            await this.leaf.openFile(file, { active: true });
+            await this.leaf.openFile(activeFile, { active: true });
             await this.leaf.setViewState({
                 type: VIEW_TYPE_CHAT,
-                state: { file: file.path },
+                state: { file: activeFile.path },
             });
         }
         this.app.workspace.revealLeaf(this.leaf);
@@ -199,17 +201,17 @@ export default class SecondBrainPlugin extends Plugin {
     async saveChat() {
         const d = get(data);
         let fileName = await this.s2b.createFilenameForChat();
-        let normalizedFilePath = normalizePath(d.targetFolder + '/' + fileName + '.md');
+        let normalizedFilePath = normalizePath(`${d.targetFolder}/${fileName}.md`);
         while (await this.app.vault.adapter.exists(normalizedFilePath)) {
             //Checks if already existing file has a number at the end
             const regex = /\((\d+)\)$/;
             const match = fileName.match(regex);
             if (match) {
-                fileName = fileName.slice(0, -3) + '(' + (parseInt(match[1], 10) + 1) + ')';
+                fileName = `${fileName.slice(0, -3)}(${parseInt(match[1], 10)}${1})`;
             } else {
-                fileName = fileName + ' (1)';
+                fileName = `${fileName} (1)`;
             }
-            normalizedFilePath = normalizePath(d.targetFolder + '/' + fileName + '.md');
+            normalizedFilePath = normalizePath(`${d.targetFolder}/${fileName}.md`);
         }
         const newChatFile = await this.app.vault.copy(this.chatView.file, normalizedFilePath);
         chatHistory.reset;
@@ -225,7 +227,7 @@ export default class SecondBrainPlugin extends Plugin {
             async (result) => {
                 if (result === 'Yes') {
                     await this.saveData({});
-                    const files = (await this.app.vault.adapter.list(normalizePath(this.manifest.dir + '/vectorstores'))).files;
+                    const files = (await this.app.vault.adapter.list(normalizePath(`${this.manifest.dir}/vectorstores`))).files;
                     for (const file of files) await this.app.vault.adapter.remove(file);
                     new Notice(t('notice.plugin_data_cleared'), 4000);
                     await this.loadSettings();
@@ -244,7 +246,7 @@ export default class SecondBrainPlugin extends Plugin {
             around(WorkspaceLeaf.prototype, {
                 setViewState(next) {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    return function (state: ViewState, ...rest: any[]) {
+                    return function (state: ViewState, ...rest: unknown[]) {
                         if (
                             // If we have a markdown file
                             state.type === 'markdown' &&

@@ -5,24 +5,24 @@ export enum LogLvl {
     DISABLED = 4,
 }
 
-class Logger {
-    private static logLevel = LogLvl.DEBUG;
+const Logger = {
+    logLevel: LogLvl.DEBUG,
 
-    static setLogLevel(logLevel: LogLvl) {
-        Logger.logLevel = logLevel;
-    }
+    setLogLevel(logLevel: LogLvl) {
+        this.logLevel = logLevel;
+    },
 
-    static debug(...args: any[]) {
-        if (Logger.logLevel <= LogLvl.DEBUG) console.debug('[S2B]', ...args);
-    }
+    debug(...args: unknown[]) {
+        if (this.logLevel <= LogLvl.DEBUG) console.debug('[S2B]', ...args);
+    },
 
-    static info(...args: any[]) {
-        if (Logger.logLevel <= LogLvl.INFO) console.info('[S2B]', ...args);
-    }
+    info(...args: unknown[]) {
+        if (this.logLevel <= LogLvl.INFO) console.info('[S2B]', ...args);
+    },
 
-    static error(...args: any[]) {
-        if (Logger.logLevel <= LogLvl.ERROR) console.error('[S2B]', ...args);
+    error(...args: unknown[]) {
+        if (this.logLevel <= LogLvl.ERROR) console.error('[S2B]', ...args);
     }
-}
+};
 
 export default Logger;
